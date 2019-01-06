@@ -1,8 +1,9 @@
 {
   "name": "linewebhook",
+  "main":"bin/app.js",
   "version": "0.0.0",
   "engines": {
-    "node":"8.1.1"
+    "node":"8.11.1"
   },
   "private": true,
   "scripts": {
