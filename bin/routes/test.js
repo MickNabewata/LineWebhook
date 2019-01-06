@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var express=require("express"),Test=function(){function e(){this.Router=express.Router(),this.get()}return e.prototype.get=function(){this.Router.get("/",function(e,t,r){t.header("Content-Type","application/json; charset=utf-8"),t.send({"値":"これはサンプルAPIです"})})},e}();exports.default=Test;
