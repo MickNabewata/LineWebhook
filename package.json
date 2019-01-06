@@ -1,6 +1,6 @@
 {
   "name": "linewebhook",
-  "main":"bin/app.js",
+  "main":"bin/server.js",
   "version": "0.0.0",
   "engines": {
     "node":"8.11.1"
