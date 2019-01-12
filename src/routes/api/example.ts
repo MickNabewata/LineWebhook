@@ -32,8 +32,10 @@ export default class Example extends ApiBase
                 httpOnly : true
             });
 
-        // 返却
+        // ステータス設定
         res.statusCode = 200;
+
+        // 応答本文設定
         res.json(output);
     }
 

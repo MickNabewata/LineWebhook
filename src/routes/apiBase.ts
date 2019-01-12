@@ -1,5 +1,4 @@
-import * as express from "express";
-import * as createError from 'http-errors';
+import * as express from 'express';
 
 /** API基底クラス */
 export default class ApiBase {
@@ -68,7 +67,6 @@ export default class ApiBase {
         }
         catch(ex)
         {
-            console.log(ex);
             res.statusCode = 400;
             res.end();
         }
@@ -171,11 +169,11 @@ export default class ApiBase {
      * @param {express.Request} res - レスポンス
      * @param {express.Request} next - リダイレクト
     */
-    protected getEvent(req : express.Request, res : express.Response, next : express.NextFunction)
-    {
-        res.statusCode = 404;
-        res.end();
-    }
+   protected getEvent(req : express.Request, res : express.Response, next : express.NextFunction)
+   {
+       res.statusCode = 404;
+       res.end();
+   }
 
     /**
      * PUTエンドポイント処理

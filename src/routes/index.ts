@@ -1,4 +1,4 @@
-import * as express from "express";
+import * as express from 'express';
 
 /** ホームページクラス */
 export default class Index {

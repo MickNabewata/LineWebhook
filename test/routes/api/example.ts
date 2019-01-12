@@ -46,8 +46,8 @@ describe('example - get', () => {
         new example().get(<express.Request>req, <express.Response>res, <express.NextFunction>next);
         
         // 確認
-        chai.expect((res.json as sinon.SinonStub).args[0][0]).to.deep.equal(expectedResponse);
-        chai.expect(res.statusCode).to.deep.equal(expectedStatusCode);
+        chai.expect(expectedResponse).to.deep.equal((res.json as sinon.SinonStub).args[0][0]);
+        chai.expect(expectedStatusCode).to.deep.equal(res.statusCode);
     });
 
     it('URLパラメータ名誤り', () => {
@@ -63,7 +63,7 @@ describe('example - get', () => {
         new example().get(<express.Request>req, <express.Response>res, <express.NextFunction>next);
         
         // 確認
-        chai.expect((res.json as sinon.SinonStub).args[0][0]).to.deep.equal(expectedResponse);
-        chai.expect(res.statusCode).to.deep.equal(expectedStatusCode);
+        chai.expect(expectedResponse).to.deep.equal((res.json as sinon.SinonStub).args[0][0]);
+        chai.expect(expectedStatusCode).to.deep.equal(res.statusCode);
     });
 });

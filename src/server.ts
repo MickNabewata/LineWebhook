@@ -4,11 +4,14 @@ import * as helmet from 'helmet';
 import * as csurf from 'csurf';
 import * as path from 'path';
 import * as cookieParser from 'cookie-parser';
+import * as line from '@line/bot-sdk';
 import * as logger from 'morgan';
 import * as favicon from 'serve-favicon'
+import * as config from 'config';
 
 import Index from './routes/index';
 import example from './routes/api/example';
+import message from './routes/api/message';
 
 /** アプリケーションクラス */
 export default class App
@@ -20,6 +23,12 @@ export default class App
 
     /** CSRF保護ミドルウェア用 今のところ使っていない(送信元をチェックすべき対象 = Web画面 が無い) */
     private csrfProtection = csurf({ cookie: true });
+
+    /** LINEミドルウェア (X-Line-Signatureヘッダの検証を含む) */
+    private lineConfig = line.middleware({
+        channelAccessToken : config.get('line.token'),
+        channelSecret : config.get('line.secret')
+    });
 
     //#endregion
 
@@ -36,6 +45,7 @@ export default class App
         this.expressApp.set('view engine', 'jade');
 
         // ミドルウェア
+        this.expressApp.use(this.lineConfig);
         this.expressApp.use(logger('dev'));
         this.expressApp.use(express.json());
         this.expressApp.use(express.urlencoded({ extended: false }));
@@ -46,6 +56,7 @@ export default class App
         // URLマッピング
         this.expressApp.use('/', new Index().Router);
         this.expressApp.use('/api/example', new example().Router);
+        this.expressApp.use('/webhook', this.lineConfig, new message().Router)
 
         // 404エラーをキャッチしてエラーハンドラへフォワード
         this.expressApp.use(function(req, res, next) {
