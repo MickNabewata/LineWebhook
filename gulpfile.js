@@ -37,6 +37,15 @@ gulp.task("build", function() {
 
     //#endregion
 
+    //#region config
+
+    // all
+    gulp.src(["config/**/*.*"])
+        // Copy
+        .pipe(gulp.dest("bin/config"));
+
+    //#endregion
+
     //#region public
 
     // all

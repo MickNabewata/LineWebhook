@@ -26,8 +26,8 @@ export default class App
 
     /** LINEミドルウェア (X-Line-Signatureヘッダの検証を含む) */
     private lineConfig = line.middleware({
-        channelAccessToken : config.get('line.token'),
-        channelSecret : config.get('line.secret')
+        channelAccessToken : config.get('lineAt.token'),
+        channelSecret : config.get('lineAt.secret')
     });
 
     //#endregion
@@ -45,7 +45,7 @@ export default class App
         this.expressApp.set('view engine', 'jade');
 
         // ミドルウェア
-        this.expressApp.use(this.lineConfig);
+        this.expressApp.use('/webhook', this.lineConfig);
         this.expressApp.use(logger('dev'));
         this.expressApp.use(express.json());
         this.expressApp.use(express.urlencoded({ extended: false }));
