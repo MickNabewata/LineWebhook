@@ -3,10 +3,14 @@ import * as line from '@line/bot-sdk';
 import ApiBase from '../apiBase';
 import * as config from 'config';
 import HttpUtility from '../../utils/httpUtil';
+import { Promise } from 'es6-promise';
 
 /** API実装例 */
 export default class Example extends ApiBase
 {
+    /** 非同期オブジェクト */
+    private promises : Promise<any[]>[] = [];
+
     //#region エンドポイント処理
 
     /**
@@ -23,39 +27,52 @@ export default class Example extends ApiBase
             // Webhookイベントオブジェクトを取得
             let events = req.body.events as line.WebhookEvent[];
 
-            // アクションによって処理を切り替え
-            let event = events[0];
-            switch(event.type)
-            {
-                // メッセージ送信の場合
-                case 'message' :
+            // 全メッセージを繰り返し処理
+            events.forEach((event) => {
+                switch(event.type)
+                {
+                    // メッセージ送信の場合
+                    case 'message' :
 
-                    // メッセージを処理
-                    this.receiveMessage(event, res);
+                        // メッセージを処理
+                        this.receiveMessage(event, res);
 
-                    break;
+                        break;
 
-                // その他の場合
-                case 'beacon' :
-                case 'follow' :
-                case 'join' :
-                case 'leave' :
-                case 'memberJoined' : 
-                case 'memberLeft' :
-                case 'postback' :
-                case 'unfollow' :
-                default :
+                    // その他の場合
+                    case 'beacon' :
+                    case 'follow' :
+                    case 'join' :
+                    case 'leave' :
+                    case 'memberJoined' : 
+                    case 'memberLeft' :
+                    case 'postback' :
+                    case 'unfollow' :
+                    default :
 
+                        res.statusCode = 200;
+                        res.end();
+
+                        break;
+                }
+            });
+
+            // 待機
+            Promise.all(this.promises).then(
+                (val) => {
                     res.statusCode = 200;
-                    res.end();
-
-                    break;
-            }
+                    res.json();
+                },
+                (err) => {
+                    res.statusCode = err.statusCode;
+                    res.json(err.body);
+                }
+            );
         }
         else
         {
             res.statusCode = 400;
-            res.json('events is required.');
+            res.json('no message.');
         }
     }
 
@@ -148,20 +165,29 @@ export default class Example extends ApiBase
      */
     private doRequest(url : string, body : any, res : express.Response)
     {
-        HttpUtility.post(
-            url,
-            {
-                json : true,
-                body : body,
-                headers : {
-                    'Content-Type':'application/json'
-                }
-            },
-            (err, response, responseBody) => {
-                // 結果をAPIの応答にセット
-                res.statusCode = response.statusCode;
-                res.json(responseBody); 
-            }
+        this.promises.push(
+            new Promise<any[]>((resolve, reject) => {
+                HttpUtility.post(
+                    url,
+                    {
+                        json : true,
+                        body : body,
+                        headers : {
+                            'Content-Type':'application/json'
+                        }
+                    },
+                    (err, response, responseBody) => {
+                        if(!err && response.statusCode == 200)
+                        {
+                            resolve();
+                        }
+                        else
+                        {
+                            reject({ statusCode : response.statusCode, body : responseBody });
+                        }
+                    }
+                );
+            })
         );
     }
 

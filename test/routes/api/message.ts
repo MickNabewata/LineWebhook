@@ -20,7 +20,7 @@ afterEach(() => {
 });
 
 describe('message - post', () => {
-    it('正常系', () => {
+    it('正常系 - 単数テキストメッセージ', () => {
         // テスト値
         let eventMessage : line.EventMessage = { id : 'dammyMessage1', type : 'text', text : 'aaa' };
         let eventSource : line.EventSource = { 'type' : 'user', 'userId' : 'dammyUser1' };
@@ -31,7 +31,7 @@ describe('message - post', () => {
         let expectedUri : string = config.get('worker.text');
         let expectedCalledOptions : request.CoreOptions = {
             json : true,
-            formData : eventMessage,
+            body : eventMessage,
             headers : {
                 'Content-Type':'application/json'
             }
@@ -59,5 +59,46 @@ describe('message - post', () => {
         chai.expect(expectedUri).to.deep.equal(calledUri);
         chai.expect(expectedCalledOptions).to.deep.equal(calledOptions);
         chai.expect(true).to.deep.equal(doRequest.calledOnce);
+    });
+
+    it('正常系 - 複数テキストメッセージ', () => {
+        // テスト値
+        let eventMessage : line.EventMessage = { id : 'dammyMessage1', type : 'text', text : 'aaa' };
+        let eventSource : line.EventSource = { 'type' : 'user', 'userId' : 'dammyUser1' };
+        let event : line.WebhookEvent = { type : 'message', message : eventMessage, timestamp : 0, source : eventSource , replyToken : 'dammyReplyToken1'};
+        let events : line.WebhookEvent[] = [ event, event ];
+        let content  = { events : events };
+        let expectedStatusCode = 200;
+        let expectedUri : string = config.get('worker.text');
+        let expectedCalledOptions : request.CoreOptions = {
+            json : true,
+            body : eventMessage,
+            headers : {
+                'Content-Type':'application/json'
+            }
+        };
+
+        // スタブ
+        let req : Partial<express.Request> = { body : content };
+        let res : Partial<express.Response> = { header: sinon.stub(), json: sinon.stub(), end: sinon.stub() };
+        let next : Partial<express.NextFunction> = {};
+        let calledUri : string;
+        let calledOptions : request.CoreOptions;
+        doRequest.callsFake((uri, options, callback) => {
+            calledUri = uri;
+            calledOptions = options;
+
+            res.statusCode = 200;
+            res.json();
+        });
+
+        // 実行
+        new message().post(<express.Request>req, <express.Response>res, <express.NextFunction>next);
+        
+        // 確認
+        chai.expect(expectedStatusCode).to.deep.equal(res.statusCode);
+        chai.expect(expectedUri).to.deep.equal(calledUri);
+        chai.expect(expectedCalledOptions).to.deep.equal(calledOptions);
+        chai.expect(true).to.deep.equal(doRequest.calledTwice);
     });
 });
