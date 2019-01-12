@@ -3,8 +3,6 @@ import * as line from '@line/bot-sdk';
 import ApiBase from '../apiBase';
 import * as config from 'config';
 import HttpUtility from '../../utils/httpUtil';
-import { RequestOptions } from 'http';
-import request = require('request');
 
 /** API実装例 */
 export default class Example extends ApiBase
@@ -19,39 +17,45 @@ export default class Example extends ApiBase
     */
     protected postEvent(req : express.Request, res : express.Response, next : express.NextFunction)
     {
-        // Webhookイベントオブジェクトを取得
-        let events = req.body as line.WebhookEvent[];
-
-        // メッセージ分だけ繰り返し
-        if(events)
+        // メッセージ処理
+        if(req.body && req.body.events && req.body.events.length > 0)
         {
-            events.forEach((event, idx)=>{
-                
-                // アクションによって処理を切り替え
-                switch(event.type)
-                {
-                    // メッセージ送信の場合
-                    case 'message' :
+            // Webhookイベントオブジェクトを取得
+            let events = req.body.events as line.WebhookEvent[];
 
-                        // メッセージを処理
-                        this.receiveMessage(event, res);
+            // アクションによって処理を切り替え
+            let event = events[0];
+            switch(event.type)
+            {
+                // メッセージ送信の場合
+                case 'message' :
 
-                        break;
+                    // メッセージを処理
+                    this.receiveMessage(event, res);
 
-                    // その他の場合
-                    case 'beacon' :
-                    case 'follow' :
-                    case 'join' :
-                    case 'leave' :
-                    case 'memberJoined' : 
-                    case 'memberLeft' :
-                    case 'postback' :
-                    case 'unfollow' :
-                    default :
-                        break;
-                }
+                    break;
 
-            });
+                // その他の場合
+                case 'beacon' :
+                case 'follow' :
+                case 'join' :
+                case 'leave' :
+                case 'memberJoined' : 
+                case 'memberLeft' :
+                case 'postback' :
+                case 'unfollow' :
+                default :
+
+                    res.statusCode = 200;
+                    res.end();
+
+                    break;
+            }
+        }
+        else
+        {
+            res.statusCode = 400;
+            res.json('events is required.');
         }
     }
 
@@ -63,16 +67,16 @@ export default class Example extends ApiBase
      * GETパラメータチェック
      * @param {express.Request} req - リクエスト
     */
-    protected getCheck(req : express.Request) : string
+    protected postCheck(req : express.Request) : string
     {
         if(!req.body)
         {
             return 'request body is required.';
         }
 
-        if(!('type' in req.body))
+        if(!('events' in req.body))
         {
-            return 'request body type is required.';
+            return 'request body events is required.';
         }
 
         return null;
@@ -90,7 +94,6 @@ export default class Example extends ApiBase
     private receiveMessage(message : line.MessageEvent, res : express.Response)
     {
         // メッセージ種類によって処理を切り替え
-        console.log('start');
         let url : string;
         let body : {};
         if(message && message.message && message.message.type)
@@ -128,7 +131,6 @@ export default class Example extends ApiBase
         // メッセージ種類毎に異なるリクエストを送信
         if(url != '')
         {
-            console.log('doRequest');
             this.doRequest(url, body, res);
         }
         else
@@ -144,13 +146,13 @@ export default class Example extends ApiBase
      * @param {{}} body - リクエストボディ 
      * @param {express.Response} res - レスポンス
      */
-    private doRequest(url : string, body : {}, res : express.Response)
+    private doRequest(url : string, body : any, res : express.Response)
     {
         HttpUtility.post(
             url,
             {
                 json : true,
-                formData : body,
+                body : body,
                 headers : {
                     'Content-Type':'application/json'
                 }

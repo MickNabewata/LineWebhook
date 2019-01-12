@@ -45,7 +45,7 @@ export default class App
         this.expressApp.set('view engine', 'jade');
 
         // ミドルウェア
-        this.expressApp.use('/webhook', this.lineConfig);
+        //this.expressApp.use('/webhook', this.lineConfig);
         this.expressApp.use(logger('dev'));
         this.expressApp.use(express.json());
         this.expressApp.use(express.urlencoded({ extended: false }));
@@ -56,7 +56,7 @@ export default class App
         // URLマッピング
         this.expressApp.use('/', new Index().Router);
         this.expressApp.use('/api/example', new example().Router);
-        this.expressApp.use('/webhook', this.lineConfig, new message().Router)
+        this.expressApp.use('/webhook', new message().Router)
 
         // 404エラーをキャッチしてエラーハンドラへフォワード
         this.expressApp.use(function(req, res, next) {
