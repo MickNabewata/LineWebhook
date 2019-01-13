@@ -45,7 +45,7 @@ export default class App
         this.expressApp.set('view engine', 'jade');
 
         // ミドルウェア
-        //this.expressApp.use('/webhook', this.lineConfig);
+        this.expressApp.use('/webhook', this.lineConfig);
         this.expressApp.use(logger('dev'));
         this.expressApp.use(express.json());
         this.expressApp.use(express.urlencoded({ extended: false }));
