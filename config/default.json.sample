@@ -1,0 +1,9 @@
+{
+    "lineAt" : {
+        "token" : "",
+        "secret" : ""
+    },
+    "worker" : {
+        "text" : "https://sample/webhook"
+    }
+}
