@@ -1,5 +1,5 @@
 {
-  "name": "linewebhook2",
+  "name": "linewebhook",
   "main": "bin/server.js",
   "version": "0.0.0",
   "engines": {
